@@ -13,19 +13,19 @@ services:
     networks:
       - url-network
 
-  backend:
-    build:
-      context: ./backend
-    ports:
-      - '8080:8080'
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/urlshortener1
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=secret
-    depends_on:
-      - postgres
-    networks:
-      - url-network
+#  backend:
+#    build:
+#      context: ./backend
+#    ports:
+#      - '8080:8080'
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/urlshortener1
+#      - SPRING_DATASOURCE_USERNAME=root
+#      - SPRING_DATASOURCE_PASSWORD=secret
+#    depends_on:
+#      - postgres
+#    networks:
+#      - url-network
 
 networks:
   url-network:
