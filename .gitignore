@@ -35,5 +35,3 @@ build/
 ###Aplication.propertie###
 application.properties
 *.env
-
-/UrlShortener1
