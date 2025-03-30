@@ -3,6 +3,7 @@ package com.developer.urlshortener.feature.login.security;
 import com.developer.urlshortener.feature.login.handler.OAuth2AuthenticationSuccessHandler;
 import com.developer.urlshortener.feature.login.service.OAuthService;
 import com.developer.urlshortener.feature.login.service.RefreshTokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -20,16 +21,16 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
     private final OAuthService oauthService;
-    private final RefreshTokenService refreshTokenService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler,
                           OAuthService oauthService,
-                          RefreshTokenService refreshTokenService) {
+                          CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.oauth2AuthenticationSuccessHandler = oauth2AuthenticationSuccessHandler;
         this.oauthService = oauthService;
-        this.refreshTokenService = refreshTokenService;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -45,12 +46,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/auth/**", "/oauth2/**", "/v1/urls/**").permitAll()
+                        .requestMatchers("/v1/auth/**",
+                                "/oauth2/**",
+                                "/v1/urls/**")
+                        .permitAll()
                         .anyRequest().authenticated()
+                ).exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(oauthService))
