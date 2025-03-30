@@ -1,6 +1,7 @@
 package com.developer.urlshortener.feature.urlGenerator.rest;
 
 import com.developer.urlshortener.feature.urlGenerator.domain.UrlDomain;
+import com.developer.urlshortener.feature.urlGenerator.messages.GenerateShortUrlRequest;
 import com.developer.urlshortener.feature.urlGenerator.service.IUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class UrlController {
     }
 
     @GetMapping("/redirect/{shortUrl}")
-    public ResponseEntity<Void> redirectToOirginal(@PathVariable String shortUrl){
+    public ResponseEntity<Void> redirectToOriginal(@PathVariable String shortUrl){
         String originalUrl = urlService.redirectToOriginalUrl(shortUrl);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(originalUrl))
@@ -60,9 +61,9 @@ public class UrlController {
     }
 
     @PostMapping("/shorten")
-    public ResponseEntity<UrlDomain> generateShortUrl(@RequestBody String originalUrl){
+    public ResponseEntity<UrlDomain> generateShortUrl(@RequestBody GenerateShortUrlRequest request){
         try{
-            Optional<UrlDomain> urlDomainOptional = urlService.createShortUrl(originalUrl);
+            Optional<UrlDomain> urlDomainOptional = urlService.createShortUrl(request);
             return urlDomainOptional
                     .map(urlDomain -> ResponseEntity.status(HttpStatus.CREATED).body(urlDomain))
                     .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));

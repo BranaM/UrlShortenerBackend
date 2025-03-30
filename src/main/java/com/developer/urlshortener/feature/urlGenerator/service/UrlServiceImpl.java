@@ -2,6 +2,7 @@ package com.developer.urlshortener.feature.urlGenerator.service;
 
 import com.developer.urlshortener.feature.urlGenerator.domain.UrlDomain;
 import com.developer.urlshortener.feature.urlGenerator.entities.UrlEntity;
+import com.developer.urlshortener.feature.urlGenerator.messages.GenerateShortUrlRequest;
 import com.developer.urlshortener.feature.urlGenerator.repository.UrlRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,11 +51,11 @@ public class UrlServiceImpl implements IUrlService{
     }
 
     @Override
-    public Optional<UrlDomain> createShortUrl(String originalUrl) {
+    public Optional<UrlDomain> createShortUrl(GenerateShortUrlRequest generateShortUrlRequest) {
         String shortUrl = generateShortUrl();
 
         UrlEntity urlEntity = new UrlEntity();
-        urlEntity.setOriginalUrl(originalUrl);
+        urlEntity.setOriginalUrl(generateShortUrlRequest.getOriginalUrl());
         urlEntity.setShortUrl(shortUrl);
 
         UrlEntity savedEntity = urlRepository.save(urlEntity);

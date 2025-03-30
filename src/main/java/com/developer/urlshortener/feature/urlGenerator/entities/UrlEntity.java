@@ -23,11 +23,11 @@ public class UrlEntity {
     @Column(nullable = false, unique = true)
     private String shortUrl;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = true)
     private Integer userId;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     public void setOriginalUrl(String originalUrl) {
