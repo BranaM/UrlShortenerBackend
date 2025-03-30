@@ -41,10 +41,11 @@ public class OAuthService extends DefaultOAuth2UserService {
         if (existingUser.isEmpty()) {
             UserDomain newUserDomain = UserDomain.builder()
                     .email(email)
+                    .password(passwordEncoder.encode("default_password"))
                     .authProvider(AuthProvider.GOOGLE)
                     .build();
 
-            UserEntity savedUser = userRepository.save(newUserDomain.toEntity(passwordEncoder.encode("default_password")));
+            UserEntity savedUser = userRepository.save(newUserDomain.toEntity());
             return new DefaultOAuth2User(
                     oAuth2User.getAuthorities(),
                     Map.of(

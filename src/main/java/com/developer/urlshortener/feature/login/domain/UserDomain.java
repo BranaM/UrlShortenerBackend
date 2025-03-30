@@ -14,35 +14,24 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 public class UserDomain {
-
     private Long id;
     private String email;
+    private String password;
     private AuthProvider authProvider;
-    private List<RefreshTokenDomain> refreshTokens;
 
     public UserDomain(UserEntity userEntity) {
         this.id = userEntity.getId();
         this.email = userEntity.getEmail();
+        this.password = userEntity.getPassword();
         this.authProvider = userEntity.getProvider();
-
-        this.refreshTokens = userEntity.getRefreshTokens().stream()
-                .map(RefreshTokenDomain::new)
-                .collect(Collectors.toList());
     }
 
-    public UserEntity toEntity(String encodedPassword) {
+    public UserEntity toEntity() {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(this.id);
         userEntity.setEmail(this.email);
+        userEntity.setPassword(this.password);
         userEntity.setProvider(this.authProvider);
-        userEntity.setPassword(encodedPassword);
-
-        if (refreshTokens != null) {
-            refreshTokens.forEach(tokenDomain -> {
-                RefreshTokenEntity refreshTokenEntity = tokenDomain.toEntity(userEntity);
-                userEntity.addRefreshToken(refreshTokenEntity);
-            });
-        }
 
         return userEntity;
     }

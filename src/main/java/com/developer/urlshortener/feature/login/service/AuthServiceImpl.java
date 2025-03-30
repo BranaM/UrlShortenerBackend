@@ -1,9 +1,14 @@
 package com.developer.urlshortener.feature.login.service;
 
+import com.developer.urlshortener.feature.login.domain.AuthProvider;
 import com.developer.urlshortener.feature.login.domain.RefreshTokenDomain;
 import com.developer.urlshortener.feature.login.domain.UserDomain;
 import com.developer.urlshortener.feature.login.entities.RefreshTokenEntity;
 import com.developer.urlshortener.feature.login.entities.UserEntity;
+import com.developer.urlshortener.feature.login.messages.LoginUserRequest;
+import com.developer.urlshortener.feature.login.messages.LoginUserResponse;
+import com.developer.urlshortener.feature.login.messages.RegisterUserRequest;
+import com.developer.urlshortener.feature.login.messages.RegisterUserResponse;
 import com.developer.urlshortener.feature.login.repository.UserRepository;
 import com.developer.urlshortener.feature.login.security.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +16,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements IAuthService{
-
     private final UserRepository userRepository;
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
@@ -29,64 +34,47 @@ public class AuthServiceImpl implements IAuthService{
         this.refreshTokenService = refreshTokenService;
     }
 
-    public Optional<UserDomain> registerUser(UserDomain userDomain) {
-        if (userRepository.existsByEmail(userDomain.getEmail())) {
+    public Optional<RegisterUserResponse> registerUser(RegisterUserRequest request) {
+        String email = request.getEmail();
+        if (userRepository.existsByEmail(email)) {
             return Optional.empty();
         }
 
-
-        String encodedPassword = passwordEncoder.encode(userDomain.getEmail());
-        UserEntity userEntity = userDomain.toEntity(encodedPassword);
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        UserEntity userEntity = UserEntity.builder()
+                .email(request.getEmail())
+                .password(encodedPassword)
+                .provider(AuthProvider.LOCAL)
+                .build();
         userEntity = userRepository.save(userEntity);
 
         String accessToken = jwtTokenUtil.generateToken(userEntity.getEmail());
-        String refreshToken = refreshTokenService.createRefreshToken(userDomain);
+        String refreshToken = refreshTokenService.createRefreshToken(new UserDomain(userEntity));
 
-        RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
-                .user(userEntity)
-                .token(refreshToken)
-                .expiryDate(LocalDateTime.now().plusDays(30))
-                .build();
-
-        userEntity.addRefreshToken(refreshTokenEntity);
         UserDomain registeredUser = new UserDomain(userEntity);
-        return Optional.of(registeredUser);
+        RegisterUserResponse response = new RegisterUserResponse(registeredUser, accessToken, refreshToken);
+        return Optional.of(response);
     }
-    public Optional<UserDomain> loginUser(String email, String password) {
-        Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(email);
-
+    public Optional<LoginUserResponse> loginUser(LoginUserRequest request) {
+        Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(request.getEmail());
         if (optionalUserEntity.isEmpty()) {
             return Optional.empty();
         }
-
-        UserEntity userEntity = optionalUserEntity.get();
-        if (!passwordEncoder.matches(password, userEntity.getPassword())) {
+        UserDomain userDomain = new UserDomain(optionalUserEntity.get());
+        if (userDomain.getAuthProvider() != AuthProvider.LOCAL ||
+                !passwordEncoder.matches(request.getPassword(), userDomain.getPassword())) {
             return Optional.empty();
         }
 
-        String accessToken = jwtTokenUtil.generateToken(email);
-        String refreshToken = refreshTokenService.createRefreshToken(new UserDomain(userEntity));
+        String accessToken = jwtTokenUtil.generateToken(request.getEmail());
+        String refreshToken = refreshTokenService.createRefreshToken(userDomain);
 
-        RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.builder()
-                .user(userEntity)
-                .token(refreshToken)
-                .expiryDate(LocalDateTime.now().plusDays(30))
-                .build();
-
-        userEntity.addRefreshToken(refreshTokenEntity);
-        UserDomain loggedInUser = new UserDomain(userEntity);
+        LoginUserResponse loggedInUser = new LoginUserResponse(userDomain, accessToken, refreshToken);
         return Optional.of(loggedInUser);
     }
+
     public Optional<String> refreshAccessToken(String refreshToken) {
-        Optional<RefreshTokenEntity> optionalRefreshToken = refreshTokenService.findByToken(refreshToken);
-
-        if (optionalRefreshToken.isEmpty() || optionalRefreshToken.get().getExpiryDate().isBefore(LocalDateTime.now())) {
-            return Optional.empty();
-        }
-
-        String email = optionalRefreshToken.get().getUser().getEmail();
-        String accessToken = jwtTokenUtil.generateToken(email);
+        String accessToken = refreshTokenService.refreshAccessToken(refreshToken);
         return Optional.of(accessToken);
     }
-
 }

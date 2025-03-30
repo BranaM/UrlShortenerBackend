@@ -11,23 +11,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name="refresh_token")
+@Table(name="refresh_token",
+        indexes = {@Index(name = "idx_userId", columnList = "userId")})
 @Entity
 public class RefreshTokenEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @Column(nullable = false)
+    private Long userId;
 
-    @Column(name = "token", nullable = false)
+    @Column(nullable = false)
     private String token;
 
-    @Column(name = "expiry_date", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime expiryDate;
-
-
 }

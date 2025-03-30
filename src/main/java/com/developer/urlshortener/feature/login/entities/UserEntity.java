@@ -2,10 +2,7 @@ package com.developer.urlshortener.feature.login.entities;
 
 import com.developer.urlshortener.feature.login.domain.AuthProvider;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -17,6 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "users")
 public class UserEntity {
     @Id
@@ -32,20 +30,7 @@ public class UserEntity {
     @Column(nullable = false)
     private AuthProvider provider;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RefreshTokenEntity> refreshTokens = new ArrayList<>();
-
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
-    public void addRefreshToken(RefreshTokenEntity token) {
-        refreshTokens.add(token);
-        token.setUser(this);
-    }
-
-    public void removeRefreshToken(RefreshTokenEntity token) {
-        refreshTokens.remove(token);
-        token.setUser(null);
-    }
 }

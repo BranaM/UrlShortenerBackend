@@ -6,6 +6,7 @@ import com.developer.urlshortener.feature.login.entities.UserEntity;
 import com.developer.urlshortener.feature.login.repository.RefreshTokenRepository;
 import com.developer.urlshortener.feature.login.security.JwtTokenUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,10 +23,12 @@ public class RefreshTokenService {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
+    @Transactional
     public String createRefreshToken(UserDomain userDomain) {
-        UserEntity userEntity = userDomain.toEntity("default_password");
+        refreshTokenRepository.deleteByUserId(userDomain.getId());
+
         RefreshTokenEntity refreshToken = RefreshTokenEntity.builder()
-                .user(userEntity)
+                .userId(userDomain.getId())
                 .token(UUID.randomUUID().toString())
                 .expiryDate(LocalDateTime.now().plusDays(7))
                 .build();

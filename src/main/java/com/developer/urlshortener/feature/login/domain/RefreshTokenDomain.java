@@ -15,20 +15,21 @@ import java.util.stream.Collectors;
 @Builder
 public class RefreshTokenDomain {
     private Long id;
+    private Long userId;
     private String token;
     private LocalDateTime expiryDate;
     public RefreshTokenDomain(RefreshTokenEntity entity) {
         this.id = entity.getId();
+        this.userId = entity.getUserId();
         this.token = entity.getToken();
         this.expiryDate = entity.getExpiryDate();
     }
 
-    public RefreshTokenEntity toEntity(UserEntity userEntity) {
+    public RefreshTokenEntity toEntity() {
         return RefreshTokenEntity.builder()
-                .user(userEntity)
+                .userId(userId)
                 .token(this.token)
                 .expiryDate(this.expiryDate)
                 .build();
     }
-
 }
