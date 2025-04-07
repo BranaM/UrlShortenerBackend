@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface IUrlService {
     String generateBase62(int length);
     String generateShortUrl();
-    Optional<UrlDomain> createShortUrl(GenerateShortUrlRequest generateShortUrlRequest);
+    UrlDomain createShortUrl(GenerateShortUrlRequest generateShortUrlRequest);
     List<UrlDomain> findAllUrls();
     Optional<UrlDomain> findById(Long id);
     Optional<UrlDomain> findByShortUrl(String shortUrl);

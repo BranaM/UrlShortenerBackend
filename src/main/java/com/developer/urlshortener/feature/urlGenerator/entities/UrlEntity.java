@@ -29,13 +29,4 @@ public class UrlEntity {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    public void setOriginalUrl(String originalUrl) {
-        this.originalUrl = originalUrl;
-    }
-
-
-    public void setShortUrl(String shortUrl) {
-        this.shortUrl = shortUrl;
-    }
 }

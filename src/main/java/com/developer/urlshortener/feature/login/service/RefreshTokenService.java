@@ -1,5 +1,6 @@
 package com.developer.urlshortener.feature.login.service;
 
+import com.developer.urlshortener.feature.login.domain.RefreshTokenDomain;
 import com.developer.urlshortener.feature.login.domain.UserDomain;
 import com.developer.urlshortener.feature.login.entities.RefreshTokenEntity;
 import com.developer.urlshortener.feature.login.entities.UserEntity;
@@ -51,7 +52,12 @@ public class RefreshTokenService {
         throw new RuntimeException("Invalid refresh token");
     }
 
-    public Optional<RefreshTokenEntity> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
+    public Optional<RefreshTokenDomain> findByToken(String token) {
+        Optional<RefreshTokenEntity> refreshTokenEntity = refreshTokenRepository.findByToken(token);
+        if(refreshTokenEntity.isEmpty()){
+            return Optional.empty();
+        }
+
+        return Optional.of(new RefreshTokenDomain(refreshTokenEntity.get()));
     }
 }

@@ -51,15 +51,16 @@ public class UrlServiceImpl implements IUrlService{
     }
 
     @Override
-    public Optional<UrlDomain> createShortUrl(GenerateShortUrlRequest generateShortUrlRequest) {
+    public UrlDomain createShortUrl(GenerateShortUrlRequest generateShortUrlRequest) {
         String shortUrl = generateShortUrl();
 
-        UrlEntity urlEntity = new UrlEntity();
-        urlEntity.setOriginalUrl(generateShortUrlRequest.getOriginalUrl());
-        urlEntity.setShortUrl(shortUrl);
+        UrlEntity urlEntity = UrlEntity.builder()
+                .originalUrl(generateShortUrlRequest.getOriginalUrl())
+                .shortUrl(shortUrl)
+                .build();
 
         UrlEntity savedEntity = urlRepository.save(urlEntity);
-        return Optional.of(new UrlDomain(savedEntity));
+        return new UrlDomain(savedEntity);
     }
 
 

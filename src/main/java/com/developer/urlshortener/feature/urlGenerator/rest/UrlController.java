@@ -63,10 +63,8 @@ public class UrlController {
     @PostMapping("/shorten")
     public ResponseEntity<UrlDomain> generateShortUrl(@RequestBody GenerateShortUrlRequest request){
         try{
-            Optional<UrlDomain> urlDomainOptional = urlService.createShortUrl(request);
-            return urlDomainOptional
-                    .map(urlDomain -> ResponseEntity.status(HttpStatus.CREATED).body(urlDomain))
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
+            UrlDomain urlDomain = urlService.createShortUrl(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(urlDomain);
         }catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
